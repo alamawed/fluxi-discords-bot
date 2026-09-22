@@ -12,12 +12,7 @@ function loadCommands(client) {
         'database.js',
         'gemini.js',
         'ai.js',
-        'guildMemberAdd.js',
-        'interactionCreate.js',
-        'messageCreate.js',
-        'messageDelete.js',
-        'messageUpdate.js',
-        'ready.js'
+        'config.json'
     ];
 
     const files = fs.readdirSync(rootPath).filter(file => file.endsWith('.js') && !skipFiles.includes(file));
@@ -32,7 +27,7 @@ function loadCommands(client) {
                 loadedCount++;
             }
         } catch (err) {
-            console.error(`[CommandHandler] Error loading command ${file}:`, err);
+            console.error(`[CommandHandler] Error loading command ${file}:`, err.message);
         }
     }
 

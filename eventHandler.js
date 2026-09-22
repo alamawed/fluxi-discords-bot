@@ -26,7 +26,7 @@ function loadEvents(client) {
                 }
                 loadedCount++;
             } catch (err) {
-                console.error(`[EventHandler] Error loading event ${file}:`, err);
+                console.error(`[EventHandler] Error loading event ${file}:`, err.message);
             }
         }
     }
