@@ -63,7 +63,6 @@ loadCommands(client);
 loadEvents(client);
 
 // 5. Global Unhandled Rejection & Uncaught Exception Guards
-// Ensures that unexpected network failures or unhandled promises never crash the bot
 process.on('unhandledRejection', (reason, promise) => {
   console.error('⚠️ [Process Guard] Unhandled Promise Rejection:');
   console.error('Promise:', promise);

@@ -6,44 +6,44 @@ const path = require('path');
  * @param {import('discord.js').Client} client 
  */
 function loadCommands(client) {
-  const commandsPath = path.join(__dirname, '..', 'commands');
-  
-  if (!fs.existsSync(commandsPath)) {
-    console.warn('[CommandHandler] Commands directory does not exist.');
-    return;
-  }
-
-  const commandFolders = fs.readdirSync(commandsPath);
-  let loadedCount = 0;
-
-  for (const folder of commandFolders) {
-    const folderPath = path.join(commandsPath, folder);
+    const commandsPath = path.join(__dirname, '..', 'commands');
     
-    // Check if it's a directory
-    if (!fs.statSync(folderPath).isDirectory()) {
-      continue;
+    if (!fs.existsSync(commandsPath)) {
+        console.warn('[CommandHandler] Commands directory does not exist.');
+        return;
     }
 
-    const commandFiles = fs.readdirSync(folderPath).filter(file => file.endsWith('.js'));
+    const commandFolders = fs.readdirSync(commandsPath);
+    let loadedCount = 0;
 
-    for (const file of commandFiles) {
-      const filePath = path.join(folderPath, file);
-      try {
-        const command = require(filePath);
-
-        if ('data' in command && 'execute' in command) {
-          client.commands.set(command.data.name, command);
-          loadedCount++;
-        } else {
-          console.warn(`[CommandHandler] Command at ${filePath} is missing required "data" or "execute" property.`);
+    for (const folder of commandFolders) {
+        const folderPath = path.join(commandsPath, folder);
+        
+        // Ensure it's a directory
+        if (!fs.statSync(folderPath).isDirectory()) {
+            continue;
         }
-      } catch (err) {
-        console.error(`[CommandHandler] Error loading command ${file}:`, err);
-      }
-    }
-  }
 
-  console.log(`[CommandHandler] Successfully loaded ${loadedCount} slash commands across ${commandFolders.length} categories.`);
+        const commandFiles = fs.readdirSync(folderPath).filter(file => file.endsWith('.js'));
+
+        for (const file of commandFiles) {
+            const filePath = path.join(folderPath, file);
+            try {
+                const command = require(filePath);
+
+                if (command && 'data' in command && 'execute' in command) {
+                    client.commands.set(command.data.name, command);
+                    loadedCount++;
+                } else {
+                    console.warn(`[CommandHandler] Command at ${filePath} is missing required "data" or "execute" property.`);
+                }
+            } catch (err) {
+                console.error(`[CommandHandler] Error loading command ${file}:`, err);
+            }
+        }
+    }
+
+    console.log(`[CommandHandler] Successfully loaded ${loadedCount} slash commands.`);
 }
 
-module.exports = { loadCommands };
+module.exports = loadCommands;
