@@ -19,8 +19,7 @@
   "author": "Antigravity Architect",
   "license": "MIT",
   "dependencies": {
-    "@discordjs/opus": "^0.9.0",
-    "@discordjs/voice":"^0.18.0",
+    "@discordjs/voice": "^0.18.0",
     "@google/genai": "^2.0.0",
     "better-sqlite3": "^11.8.1",
     "discord-player": "^6.7.1",
@@ -32,6 +31,6 @@
     "nodemon": "^3.1.9"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   }
 }
