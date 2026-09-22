@@ -3,6 +3,7 @@ require('dotenv').config();
 // --- PATH OVERRIDE FIX FOR FLAT STRUCTURE ---
 const Module = require('module');
 const path = require('path');
+const fs = require('fs');
 const originalRequire = Module.prototype.require;
 
 Module.prototype.require = function(request) {
@@ -20,7 +21,9 @@ const {
   Client, 
   GatewayIntentBits, 
   Partials, 
-  Collection 
+  Collection,
+  REST,
+  Routes 
 } = require('discord.js');
 const { Player } = require('discord-player');
 
@@ -48,7 +51,7 @@ const client = new Client({
   ]
 });
 
-// 2. Collections for Slash Commands and Rate-limiting Cooldowns
+// 2. Collections for Slash Commands and Cooldowns
 client.commands = new Collection();
 client.cooldowns = new Collection();
 
@@ -77,23 +80,74 @@ try {
 loadCommands(client);
 loadEvents(client);
 
-// 5. Global Unhandled Rejection & Uncaught Exception Guards
-process.on('unhandledRejection', (reason, promise) => {
+// 5. Automatic Slash Command Deployment on Startup
+async function deployCommands() {
+  const commands = [];
+  const rootPath = __dirname;
+  const skipFiles = [
+    'index.js', 'commandHandler.js', 'eventHandler.js', 'playerHandler.js', 
+    'deploy-commands.js', 'database.js', 'gemini.js', 'ai.js', 'config.json'
+  ];
+
+  const commandFiles = fs.readdirSync(rootPath).filter(file => file.endsWith('.js') && !skipFiles.includes(file));
+
+  for (const file of commandFiles) {
+    try {
+      const filePath = path.join(rootPath, file);
+      const command = require(filePath);
+      if (command && 'data' in command && 'execute' in command) {
+        commands.push(command.data.toJSON());
+      }
+    } catch (err) {
+      // Skip non-command files
+    }
+  }
+
+  const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
+
+  try {
+    console.log(`[Deployer] Started refreshing ${commands.length} application (/) commands.`);
+
+    // If you want instant deployment to a specific test server, set GUILD_ID in Railway. Otherwise, it deploys globally.
+    if (process.env.GUILD_ID) {
+      await rest.put(
+        Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
+        { body: commands },
+      );
+      console.log(`[Deployer] Successfully reloaded commands for guild: ${process.env.GUILD_ID}`);
+    } else {
+      await rest.put(
+        Routes.applicationCommands(process.env.CLIENT_ID),
+        { body: commands },
+      );
+      console.log('[Deployer] Successfully reloaded global application commands.');
+    }
+  } catch (error) {
+    console.error('[Deployer] Error deploying commands:', error);
+  }
+}
+
+// 6. Global Unhandled Guards
+process.on('unhandledRejection', (reason) => {
   console.error('⚠️ [Process Guard] Unhandled Promise Rejection:', reason);
 });
 
-process.on('uncaughtException', (err, origin) => {
-  console.error(`💥 [Process Guard] Uncaught Exception (${origin}):`, err);
-});
-
-// 6. Connect to Discord Gateway
+// 7. Connect to Discord Gateway
 const token = process.env.DISCORD_TOKEN;
 
-if (!token || token === 'your_discord_bot_token_here') {
-  console.error('❌ [Startup Error] DISCORD_TOKEN is missing or not set in .env / Railway Variables!');
+if (!token) {
+  console.error('❌ [Startup Error] DISCORD_TOKEN is missing or not set in Railway Variables!');
   process.exit(1);
 }
 
-client.login(token).catch(err => {
+client.login(token).then(async () => {
+  console.log(`✅ Logged in successfully as ${client.user.tag}!`);
+  // Automatically deploy commands upon successful login if CLIENT_ID is provided
+  if (process.env.CLIENT_ID) {
+    await deployCommands();
+  } else {
+    console.warn('⚠️ [Deployer] CLIENT_ID variable is missing in Railway. Skipping automatic command registration.');
+  }
+}).catch(err => {
   console.error('❌ [Login Error] Failed to connect to Discord Gateway:', err.message);
 });
