@@ -60,14 +60,6 @@ module.exports = {
     const description = interaction.options.getString('description') || 'No description provided.';
     const customChannel = interaction.options.getChannel('channel');
 
-    // Validation: Require either attachment or link
-    if (!attachment && !link) {
-      return interaction.reply({
-        content: '❌ **Submission Error:** You must provide at least one **attachment file** or a valid **media link** to publish a showcase.',
-        ephemeral: true
-      });
-    }
-
     // Determine target channel
     const defaultChannelId = process.env.MEDIA_CHANNEL_ID;
     const targetChannel = customChannel || 
@@ -112,7 +104,7 @@ module.exports = {
         name: `${interaction.user.tag} • Community Creator`,
         iconURL: interaction.user.displayAvatarURL({ dynamic: true })
       })
-      .setTitle(`🏷️ [${category}] ${title}`)
+      .setTitle(`🏷️ [${category}]${title}`)
       .setDescription(description)
       .addFields(
         { name: 'Category', value: `\`${category}\``, inline: true },
