@@ -1,4 +1,21 @@
 require('dotenv').config();
+
+// --- PATH OVERRIDE FIX FOR FLAT STRUCTURE ---
+const Module = require('module');
+const path = require('path');
+const originalRequire = Module.prototype.require;
+
+Module.prototype.require = function(request) {
+  if (request.includes('config.json')) {
+    return originalRequire.call(this, path.join(__dirname, 'config.json'));
+  }
+  if (request.includes('services/database') || request.includes('database.js')) {
+    return originalRequire.call(this, path.join(__dirname, 'database.js'));
+  }
+  return originalRequire.call(this, request);
+};
+// -------------------------------------------
+
 const { 
   Client, 
   GatewayIntentBits, 
@@ -45,14 +62,12 @@ try {
     }
   });
 
-  // Load default stream extractors (YouTube, Spotify, SoundCloud, Apple Music)
   player.extractors.loadDefault().then(() => {
     console.log('[MusicPlayer] Default audio extractors loaded successfully.');
   }).catch(err => {
     console.warn('[MusicPlayer] Note: Default extractors loading notice:', err.message);
   });
 
-  // Attach player event listeners
   setupPlayerEvents(player);
 } catch (err) {
   console.error('[MusicPlayer] Failed to initialize discord-player:', err.message);
@@ -64,29 +79,21 @@ loadEvents(client);
 
 // 5. Global Unhandled Rejection & Uncaught Exception Guards
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('⚠️ [Process Guard] Unhandled Promise Rejection:');
-  console.error('Promise:', promise);
-  console.error('Reason:', reason);
+  console.error('⚠️ [Process Guard] Unhandled Promise Rejection:', reason);
 });
 
 process.on('uncaughtException', (err, origin) => {
   console.error(`💥 [Process Guard] Uncaught Exception (${origin}):`, err);
 });
 
-process.on('uncaughtExceptionMonitor', (err, origin) => {
-  console.error(`🔍 [Process Guard Monitor] Exception logged (${origin}):`, err.message);
-});
-
 // 6. Connect to Discord Gateway
 const token = process.env.DISCORD_TOKEN;
 
 if (!token || token === 'your_discord_bot_token_here') {
-  console.error('❌ [Startup Error] DISCORD_TOKEN is missing or not set in .env!');
-  console.log('👉 Please edit the .env file with your bot token and restart.');
+  console.error('❌ [Startup Error] DISCORD_TOKEN is missing or not set in .env / Railway Variables!');
   process.exit(1);
 }
 
 client.login(token).catch(err => {
   console.error('❌ [Login Error] Failed to connect to Discord Gateway:', err.message);
-  console.log('👉 Check your DISCORD_TOKEN and ensure all required Privileged Gateway Intents are enabled in the Discord Developer Portal.');
 });
