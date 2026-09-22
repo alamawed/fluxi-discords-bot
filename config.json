@@ -1,0 +1,39 @@
+{
+  "colors": {
+    "primary": "#5865F2",
+    "success": "#57F287",
+    "error": "#ED4245",
+    "warning": "#FEE75C",
+    "info": "#3498DB",
+    "music": "#9B59B6",
+    "ai": "#1ABC9C"
+  },
+  "leveling": {
+    "minXpPerMessage": 15,
+    "maxXpPerMessage": 25,
+    "xpCooldownSeconds": 60,
+    "baseLevelXp": 100,
+    "levelMultiplier": 1.5
+  },
+  "economy": {
+    "dailyRewardMin": 100,
+    "dailyRewardMax": 250,
+    "currencySymbol": "🪙",
+    "currencyName": "Coins"
+  },
+  "mediaPosting": {
+    "defaultCategory": "General",
+    "allowedCategories": [
+      "Graphics & Art",
+      "Clips & Highlights",
+      "Dev & Code",
+      "Free Resources",
+      "General"
+    ]
+  },
+  "bot": {
+    "footerText": "Powered by Antigravity Discord Core • v1.0",
+    "activity": "Serving communities • /help",
+    "activityType": "Custom"
+  }
+}

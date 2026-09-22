@@ -1,0 +1,37 @@
+{
+  "name": "discord-multipurpose-bot",
+  "version": "1.0.0",
+  "description": "Production-ready, modular multi-purpose Discord.js v14 bot with Music, AI, Economy, Moderation, and Custom Posting",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "deploy": "node deploy-commands.js"
+  },
+  "keywords": [
+    "discord.js",
+    "discord-bot",
+    "gemini",
+    "music-bot",
+    "economy",
+    "moderation"
+  ],
+  "author": "Antigravity Architect",
+  "license": "MIT",
+  "dependencies": {
+    "@discordjs/opus": "^0.9.0",
+    "@discordjs/voice": "^0.17.1",
+    "@google/genai": "^0.1.1",
+    "better-sqlite3": "^11.8.1",
+    "discord-player": "^6.7.1",
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.7",
+    "ffmpeg-static": "^5.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
