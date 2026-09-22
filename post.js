@@ -17,7 +17,7 @@ module.exports = {
       option.setName('title')
         .setDescription('A catchy, descriptive title for your showcase')
         .setRequired(true)
-        .setMaxLength(100)
+        // Character length limit removed completely
     )
     .addAttachmentOption(option =>
       option.setName('attachment')
