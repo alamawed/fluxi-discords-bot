@@ -1,45 +1,38 @@
 const fs = require('fs');
 const path = require('path');
 
-/**
- * Loads all slash commands from subdirectories inside the commands folder.
- * @param {import('discord.js').Client} client 
- */
 function loadCommands(client) {
-    const commandsPath = path.join(__dirname, '..', 'commands');
-    
-    if (!fs.existsSync(commandsPath)) {
-        console.warn('[CommandHandler] Commands directory does not exist.');
-        return;
-    }
+    const rootPath = __dirname;
+    const skipFiles = [
+        'index.js', 
+        'commandHandler.js', 
+        'eventHandler.js', 
+        'playerHandler.js', 
+        'deploy-commands.js',
+        'database.js',
+        'gemini.js',
+        'ai.js',
+        'guildMemberAdd.js',
+        'interactionCreate.js',
+        'messageCreate.js',
+        'messageDelete.js',
+        'messageUpdate.js',
+        'ready.js'
+    ];
 
-    const commandFolders = fs.readdirSync(commandsPath);
+    const files = fs.readdirSync(rootPath).filter(file => file.endsWith('.js') && !skipFiles.includes(file));
     let loadedCount = 0;
 
-    for (const folder of commandFolders) {
-        const folderPath = path.join(commandsPath, folder);
-        
-        // Ensure it's a directory
-        if (!fs.statSync(folderPath).isDirectory()) {
-            continue;
-        }
-
-        const commandFiles = fs.readdirSync(folderPath).filter(file => file.endsWith('.js'));
-
-        for (const file of commandFiles) {
-            const filePath = path.join(folderPath, file);
-            try {
-                const command = require(filePath);
-
-                if (command && 'data' in command && 'execute' in command) {
-                    client.commands.set(command.data.name, command);
-                    loadedCount++;
-                } else {
-                    console.warn(`[CommandHandler] Command at ${filePath} is missing required "data" or "execute" property.`);
-                }
-            } catch (err) {
-                console.error(`[CommandHandler] Error loading command ${file}:`, err);
+    for (const file of files) {
+        const filePath = path.join(rootPath, file);
+        try {
+            const command = require(filePath);
+            if (command && 'data' in command && 'execute' in command) {
+                client.commands.set(command.data.name, command);
+                loadedCount++;
             }
+        } catch (err) {
+            console.error(`[CommandHandler] Error loading command ${file}:`, err);
         }
     }
 

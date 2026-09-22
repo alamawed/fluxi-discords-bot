@@ -7,9 +7,9 @@ const {
 } = require('discord.js');
 const { Player } = require('discord-player');
 
-const { loadCommands } = require('./handlers/commandHandler');
-const { loadEvents } = require('./handlers/eventHandler');
-const { setupPlayerEvents } = require('./handlers/playerHandler');
+const loadCommands = require('./commandHandler');
+const loadEvents = require('./eventHandler');
+const setupPlayerEvents = require('./playerHandler');
 
 // 1. Initialize Discord Client with production-grade intents
 const client = new Client({
