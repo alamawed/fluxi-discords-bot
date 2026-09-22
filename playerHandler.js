@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require('discord.js');
-const config = require('../config.json');
+const config = require('./config.json');
 
 /**
  * Registers listeners for the discord-player instance.
@@ -101,4 +101,4 @@ function setupPlayerEvents(player) {
   console.log('[PlayerHandler] Discord Player event listeners configured successfully.');
 }
 
-module.exports = { setupPlayerEvents };
+module.exports = setupPlayerEvents;
