@@ -1,8 +1,9 @@
 const { EmbedBuilder } = require('discord.js');
+const { DefaultExtractors } = require('@discord-player/extractor');
 const config = require('./config.json');
 
 /**
- * Registers listeners for the discord-player instance.
+ * Registers listeners and load extractors for the discord-player instance.
  * @param {import('discord-player').Player} player 
  */
 function setupPlayerEvents(player) {
@@ -10,6 +11,18 @@ function setupPlayerEvents(player) {
     console.warn('[PlayerHandler] Discord Player is not available or initialized.');
     return;
   }
+
+  // Load default stream extractors (fixes "Not Found" search/link issues)
+  async function initializeExtractors() {
+    try {
+      await player.extractors.loadMulti(DefaultExtractors);
+      console.log('[PlayerHandler] Default audio extractors loaded successfully via @discord-player/extractor.');
+    } catch (err) {
+      console.error('[PlayerHandler] Failed to load extractors:', err.message);
+    }
+  }
+
+  initializeExtractors();
 
   // Emitted when a track starts playing
   player.events.on('playerStart', (queue, track) => {
@@ -24,7 +37,7 @@ function setupPlayerEvents(player) {
         { name: 'Artist / Channel', value: `🎤 \`${track.author || 'Unknown'}\``, inline: true },
         { name: 'Requested By', value: `${track.requestedBy || 'Unknown Member'}`, inline: true }
       )
-      .setFooter({ text: `${config.bot.footerText} • Queue length: ${queue.tracks.size} track(s)` })
+      .setFooter({ text: `${config.bot?.footerText || 'FLUXi Bot'} • Queue length: ${queue.tracks.size} track(s)` })
       .setTimestamp();
 
     queue.metadata?.channel?.send({ embeds: [embed] }).catch(err => {
@@ -35,7 +48,7 @@ function setupPlayerEvents(player) {
   // Emitted when a single track is added to the queue
   player.events.on('audioTrackAdd', (queue, track) => {
     const embed = new EmbedBuilder()
-      .setColor(config.colors.info)
+      .setColor(config.colors.info || '#3498DB')
       .setTitle('Added to Queue 🎶')
       .setDescription(`[${track.title}](${track.url})`)
       .setThumbnail(track.thumbnail)
@@ -52,7 +65,7 @@ function setupPlayerEvents(player) {
   // Emitted when an entire playlist is added to the queue
   player.events.on('audioTracksAdd', (queue, tracks) => {
     const embed = new EmbedBuilder()
-      .setColor(config.colors.info)
+      .setColor(config.colors.info || '#3498DB')
       .setTitle('Playlist Added to Queue 📂')
       .setDescription(`Successfully queued **${tracks.length}** tracks from playlist.`)
       .setTimestamp();
@@ -63,7 +76,7 @@ function setupPlayerEvents(player) {
   // Emitted when queue finishes
   player.events.on('emptyQueue', (queue) => {
     const embed = new EmbedBuilder()
-      .setColor(config.colors.warning)
+      .setColor(config.colors.warning || '#F1C40F')
       .setDescription('🏁 **Queue finished.** No more tracks left to play.')
       .setTimestamp();
 
@@ -73,7 +86,7 @@ function setupPlayerEvents(player) {
   // Emitted when voice channel is empty
   player.events.on('emptyChannel', (queue) => {
     const embed = new EmbedBuilder()
-      .setColor(config.colors.warning)
+      .setColor(config.colors.warning || '#F1C40F')
       .setDescription('👋 Voice channel became empty. Leaving to save resources.')
       .setTimestamp();
 
@@ -84,7 +97,7 @@ function setupPlayerEvents(player) {
   player.events.on('playerError', (queue, error, track) => {
     console.error(`[PlayerHandler] Track Error on "${track?.title}":`, error.message);
     const embed = new EmbedBuilder()
-      .setColor(config.colors.error)
+      .setColor(config.colors.error || '#E74C3C')
       .setTitle('Audio Playback Error')
       .setDescription(`⚠️ An error occurred while streaming **${track?.title || 'current track'}**:\n\`${error.message}\``)
       .setFooter({ text: 'Skipping to next track if available...' })
@@ -98,7 +111,7 @@ function setupPlayerEvents(player) {
     console.error(`[PlayerHandler] General Player Error in guild ${queue.guild.id}:`, error.message);
   });
 
-  console.log('[PlayerHandler] Discord Player event listeners configured successfully.');
+  console.log('[PlayerHandler] Discord Player event listeners and extractors configured successfully.');
 }
 
 module.exports = setupPlayerEvents;

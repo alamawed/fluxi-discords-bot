@@ -19,6 +19,7 @@
   "author": "Antigravity Architect",
   "license": "MIT",
   "dependencies": {
+    "@discord-player/extractor": "^4.5.0",
     "@discordjs/voice": "^0.18.0",
     "@google/genai": "^2.0.0",
     "better-sqlite3": "^11.8.1",
