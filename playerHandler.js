@@ -1,5 +1,6 @@
 const { EmbedBuilder } = require('discord.js');
 const { DefaultExtractors } = require('@discord-player/extractor');
+const { YoutubeiExtractor } = require('discord-player-youtubei');
 const config = require('./config.json');
 
 /**
@@ -12,11 +13,14 @@ function setupPlayerEvents(player) {
     return;
   }
 
-  // Load default stream extractors (fixes "Not Found" search/link issues)
+  // Load stream extractors with YouTubei fallback to fix "Not Found" errors
   async function initializeExtractors() {
     try {
+      // Register the stable YoutubeiExtractor first
+      await player.extractors.register(YoutubeiExtractor, {});
+      // Load remaining default extractors
       await player.extractors.loadMulti(DefaultExtractors);
-      console.log('[PlayerHandler] Default audio extractors loaded successfully via @discord-player/extractor.');
+      console.log('[PlayerHandler] Audio extractors (including Youtubei) loaded successfully.');
     } catch (err) {
       console.error('[PlayerHandler] Failed to load extractors:', err.message);
     }
@@ -62,32 +66,11 @@ function setupPlayerEvents(player) {
     queue.metadata?.channel?.send({ embeds: [embed] }).catch(() => {});
   });
 
-  // Emitted when an entire playlist is added to the queue
-  player.events.on('audioTracksAdd', (queue, tracks) => {
-    const embed = new EmbedBuilder()
-      .setColor(config.colors.info || '#3498DB')
-      .setTitle('Playlist Added to Queue 📂')
-      .setDescription(`Successfully queued **${tracks.length}** tracks from playlist.`)
-      .setTimestamp();
-
-    queue.metadata?.channel?.send({ embeds: [embed] }).catch(() => {});
-  });
-
   // Emitted when queue finishes
   player.events.on('emptyQueue', (queue) => {
     const embed = new EmbedBuilder()
       .setColor(config.colors.warning || '#F1C40F')
       .setDescription('🏁 **Queue finished.** No more tracks left to play.')
-      .setTimestamp();
-
-    queue.metadata?.channel?.send({ embeds: [embed] }).catch(() => {});
-  });
-
-  // Emitted when voice channel is empty
-  player.events.on('emptyChannel', (queue) => {
-    const embed = new EmbedBuilder()
-      .setColor(config.colors.warning || '#F1C40F')
-      .setDescription('👋 Voice channel became empty. Leaving to save resources.')
       .setTimestamp();
 
     queue.metadata?.channel?.send({ embeds: [embed] }).catch(() => {});
@@ -100,18 +83,16 @@ function setupPlayerEvents(player) {
       .setColor(config.colors.error || '#E74C3C')
       .setTitle('Audio Playback Error')
       .setDescription(`⚠️ An error occurred while streaming **${track?.title || 'current track'}**:\n\`${error.message}\``)
-      .setFooter({ text: 'Skipping to next track if available...' })
       .setTimestamp();
 
     queue.metadata?.channel?.send({ embeds: [embed] }).catch(() => {});
   });
 
-  // Emitted on general player errors
   player.events.on('error', (queue, error) => {
     console.error(`[PlayerHandler] General Player Error in guild ${queue.guild.id}:`, error.message);
   });
 
-  console.log('[PlayerHandler] Discord Player event listeners and extractors configured successfully.');
+  console.log('[PlayerHandler] Discord Player event listeners configured successfully.');
 }
 
 module.exports = setupPlayerEvents;

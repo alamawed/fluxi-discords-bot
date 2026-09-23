@@ -18,8 +18,9 @@
   ],
   "author": "Antigravity Architect",
   "license": "MIT",
-  "dependencies": {
+ "dependencies": {
     "@discord-player/extractor": "^4.5.0",
+    "discord-player-youtubei": "^1.1.0",
     "@discordjs/voice": "^0.18.0",
     "@google/genai": "^2.0.0",
     "better-sqlite3": "^11.8.1",
@@ -27,7 +28,7 @@
     "discord.js": "^14.16.3",
     "dotenv": "^16.4.7",
     "ffmpeg-static": "^5.2.0"
-  },
+   },
   "devDependencies": {
     "nodemon": "^3.1.9"
   },
